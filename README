@@ -1,0 +1,21 @@
+
+Records have the following fields :
+
+    id
+    barcode
+    user
+    date
+    lat
+    lng
+    surface_material    : metal, wood, plastic, glass, stone
+    surface_condition   : smooth, rough, crumbly
+    surface_humidity    : dry, humid, damp, wet
+    context_type        : business, school, vehicle, park, wilderness
+    inorout             : indoors, outdoors
+    direct_sunlight     : yes, no
+    temp
+    closeup             : path to closeup photo
+    closeup_thumb       : path to closeup thumbnail
+    context             : path to context photo
+    context_thumb       : path to context thumbnail
+    

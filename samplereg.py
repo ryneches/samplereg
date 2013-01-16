@@ -22,7 +22,10 @@ def valid_login( username, password ) :
 
 @app.route( '/' )
 def index() :
-    return 'hello'
+    if 'username' in session :
+        return 'The index page. You\'re logged in as ' + session['username']
+    else :
+        return 'The index page. You\'re not logged in.'
 
 @app.route( '/login', methods = ['GET', 'POST'] )
 def login() :
