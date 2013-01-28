@@ -1,8 +1,8 @@
 <!doctype html>
 {% if authenticated %}
-    <title>Citizen Science Sample Registrar : {{ username }}</title>
-    <h1>Welcome to your profile page, {{ username }}!</h1>
+    <title>Citizen Science Sample Registrar : {{ user.username }}</title>
+    <h1>Welcome to your profile page, {{ user.realname }}!</h1>
 {% else %}
-    <title>Citizen Science Sample Registrar for {{ username}}</title>
-    <h1>This is the profile page for {{ username }}</h1>
+    <title>Citizen Science Sample Registrar for {{ user.username }}</title>
+    <h1>This is the profile page for {{ user.realname }}</h1>
 {% endif %}

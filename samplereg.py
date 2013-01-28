@@ -93,7 +93,7 @@ def add_user( form, avatar_path ) :
 def valid_login( username, password ) :
     p = md5( password ).hexdigest()
     user = get_user( username )
-    if user and user.password == p :
+    if user and user['password'] == p :
         return True
     else :
         return False
@@ -132,6 +132,7 @@ def logout() :
 @app.route( '/signup', methods = ['GET', 'POST'] )
 def signup() :
     if request.method == 'POST' :
+        username = request.form['username']
         file = request.files['file']
         if file and allowed_file( file.filename ) :
             filename = secure_filename( file.filename )
@@ -139,7 +140,8 @@ def signup() :
             file.save( avatar_path )
         add_user( request.form, avatar_path )
         flash( 'New user added' )
-        return redirect( url_for( 'profile', username=request.form['username'] ) )
+        session['username'] = username
+        return redirect( url_for( 'profile', username=username ) )
     else :
         return render_template( 'signup.html' )
 
@@ -149,21 +151,18 @@ def profile( username ) :
     user = get_user( username )
     
     if not user :
-        
         return 'User does not exist.'
-        
     else :
-    
         records = get_user_records( username )
         if 'username' in session :
             return render_template( 'profile.html', 
-                                    username = username,
+                                    user = user,
                                     records = records,
                                     authenticated = True )
         else :
             return render_template( 'profile.html',
-                                    records = records, 
-                                    username = username )
+                                    user = user,
+                                    records = records ) 
 
 if __name__ == '__main__' :
     app.debug = True
