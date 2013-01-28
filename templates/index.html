@@ -1,20 +1,17 @@
-<!doctype html>
-<title>samplereg : a basic sample registration tool</title>
+{% extends "layout.html" %}
+{% block body %}
 
-<h1>Welcome to samplereg</h1>
+<h1>The Sample Registrar</h1>
 
-This is samplereg, a simple web application for registering sampling
-kis for citizen science projects.
+<p>This is samplereg, a simple web application for registering sampling
+kits for citizen science projects.</p>
 
-<p>
-
-{% if username %}
-    <b>Hello {{ username }}!</b><br />
-    <a href="/logout">Log out</a><br />
-    <a href="/user/{{ username }}">Visit your profile</a><br />
-    <a href="/register">Register a sample</a>
+{% if not username %}
+        <a href="{{ url_for('login') }}">Log in</a><br />
+		  <a href="{{ url_for('signup') }}">Sign up</a>
 {% else %}
-    <a href="/signup">Sign up</a><br />
-    <a href="/login">Log in</a><br />
+        <a href="{{ url_for('logout') }}">Log out</a><br />
+		  <a href="{{ url_for('register') }}">Register sample
 {% endif %}
 
+{% endblock %}

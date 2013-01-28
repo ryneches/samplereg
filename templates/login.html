@@ -1,5 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<p>This is samplereg, a simple web application for registering sampling
+kits for citizen science projects.</p>
+
 <form action="/login" method="post">
 <input type="text" name="username" size="15"></input><br />
 <input type="password" name="password" size="15"></input><br />
 <input type="submit" value="login"></input>
 </form>
+
+{% endblock %}

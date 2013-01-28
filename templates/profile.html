@@ -1,9 +1,9 @@
-<!doctype html>
+{% extends "layout.html" %}
+{% block body %}
+
 {% if authenticated %}
-    <title>Citizen Science Sample Registrar : {{ user.username }}</title>
     <h1>Welcome to your profile page, {{ user.realname }}!</h1>
 {% else %}
-    <title>Citizen Science Sample Registrar for {{ user.username }}</title>
     <h1>This is the profile page for {{ user.realname }}</h1>
 {% endif %}
 
@@ -19,4 +19,8 @@
 
 <p>
 
-<a href='/register'>Register a new sample</a>
+{% if authenticated %}
+    <a href='/register'>Register a new sample</a>
+{% endif %}
+
+{% endblock %}
