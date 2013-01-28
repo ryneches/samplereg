@@ -1,21 +1,45 @@
 
+Teams have the following fields :
+    id                  : database key
+    name                : unique team name
+    teamname            : full team name
+    city                : city
+    state               : state
+    country             : country
+    leader              : list of users who are team leaders
+    
+
+Users have the following fields :
+    id                  : database key
+    username            : unique username
+    password            : password hash
+    realname            : user's real name
+    city                : city
+    state               : state or province
+    country             : country
+    team                : user's team
+    avitar              : path to avitar
+
 Records have the following fields :
 
-    id
-    barcode
-    user
-    date
-    lat
-    lng
+    id                  : database key
+    sample_id           : sample reference id, created on sample receipt
+    qrcode              : the qrcode, created when kit is assembled
+    user                : the username of the submitter
+    date                : time of collection
+    lat                 : latitude
+    lng                 : longitude
     surface_material    : metal, wood, plastic, glass, stone
     surface_condition   : smooth, rough, crumbly
     surface_humidity    : dry, humid, damp, wet
     context_type        : business, school, vehicle, park, wilderness
     inorout             : indoors, outdoors
     direct_sunlight     : yes, no
-    temp
+    temp                : temperature
     closeup             : path to closeup photo
     closeup_thumb       : path to closeup thumbnail
     context             : path to context photo
     context_thumb       : path to context thumbnail
-    
+    name                : short name for sample
+    description         : extended description
+    audited             : yes, no (sample has been reviewed & accepted)
