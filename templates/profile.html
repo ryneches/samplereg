@@ -6,3 +6,17 @@
     <title>Citizen Science Sample Registrar for {{ user.username }}</title>
     <h1>This is the profile page for {{ user.realname }}</h1>
 {% endif %}
+
+{% for r in records %}
+    {{ r.identifier }}, {{ r.name }}
+        {% if r.audited %}
+            (audited) : 
+        {% else %}
+            (unaudited) : 
+        {% endif %}
+    {{ r.description }} <br \>
+{% endfor %}
+
+<p>
+
+<a href='/register'>Register a new sample</a>

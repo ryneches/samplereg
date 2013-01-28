@@ -27,9 +27,7 @@ create table records (
     direct_sunlight     boolean,
     temp                real,
     closeup             string not null,
-    closeup_thumb       string not null,
     context             string not null,
-    context_thumb       string not null,
     name                string not null,
     description         string not null,
     audited             boolean

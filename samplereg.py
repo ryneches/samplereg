@@ -7,18 +7,24 @@ from flask import g, flash
 from os import path
 from md5 import md5
 from datetime import datetime
+import time
 from contextlib import closing
 from werkzeug import secure_filename
+from PIL import Image
 import sqlite3
 
 # configuration
 DATABASE = 'samplereg.db'
 DEBUG = True
+TRAP_BAD_REQUEST_KEY_ERRORS = True
+TRAP_HTTP_EXCEPTIONS = True
 SECRET_KEY = 'OMG so secret'
 USERNAME = 'admin'
 PASSWORD = 'default'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+VALID_IDENTIFIERS = 'ids.txt'
+THUMB_SIZE = 128
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -44,6 +50,13 @@ def before_request():
 @app.teardown_request
 def teardown_request(exception):
     g.db.close()
+
+def make_thumbnail( infile ) :
+    size = app.config['THUMB_SIZE'],  app.config['THUMB_SIZE']
+    file, ext = path.splitext(infile)
+    im = Image.open(infile)
+    im.thumbnail(size, Image.ANTIALIAS)
+    im.save(file + "_thumb.png", "PNG")
 
 def get_user( username ) :
     cur = g.db.execute('select username, password, realname, city, state, country, team, avatar from users where username = ? order by id desc', (username,) )
@@ -80,15 +93,71 @@ def get_user_records( username ) :
     
     return records
 
-def add_user( form, avatar_path ) :
+def add_user( form ) :
+    
+    # save the user's avatar file
+    file = request.files['avatar']
+    if file and allowed_file( file.filename ) :
+        ext = file.filename.split('.')[-1]
+        filename = secure_filename( form['username'] + '.' + ext )
+        file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
+        file.save( file_path )
+        make_thumbnail( file_path )
+    else :
+        return False
+
     values = (  form['username'], 
                 md5( form['password'] ).hexdigest(),
                 form['realname'],
                 form['city'], form['state'], form['country'], 
-                form['team'], avatar_path )   
+                form['team'], file_path )   
     # SQL is gross
     g.db.execute('insert into users (username, password, realname, city, state, country, team, avatar) values (?,?,?,?,?,?,?,?)', values )
     g.db.commit()
+
+def add_record( user, form ) :
+    
+    # make sure submitted identifier is in our allowed list
+    # return False otherwise
+    ids = open( app.config['VALID_IDENTIFIERS'] ).read().strip().split('\n')
+    if not ids.__contains__(form['identifier']) :
+        return False
+
+    # save the photos
+    photos = { 'context' : '', 'closeup' : '' }
+    for photo in photos.keys() :
+        file = request.files[photo]
+        if file and allowed_file( file.filename ) :
+            ext = file.filename.split('.')[-1]
+            filename = secure_filename( form['identifier'] + '_' + photo + '.' + ext )
+            file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
+            file.save( file_path )
+            make_thumbnail( file_path )
+            photos[photo] = file_path
+        else :
+            return False
+   
+    # all new records are created with audited=False
+    values = (  form['identifier'],
+                user['username'],
+                int(time.time()),
+                float(form['lat']),
+                float(form['lng']),
+                form['surface_material'],
+                form['surface_condition'],
+                form['surface_humidity'],
+                form['context_type'],
+                form['inorout'],
+                bool(form['direct_sunlight']),
+                float(form['temp']),
+                photos['closeup'],
+                photos['context'],
+                form['name'],
+                form['description'],
+                False )
+    g.db.execute('insert into records (identifier, user, date, lat, lng, surface_material, surface_condition, surface_humidity, context_type, inorout, direct_sunlight, temp, closeup, context, name, description, audited) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', values )
+    g.db.commit()
+    return True
 
 def valid_login( username, password ) :
     p = md5( password ).hexdigest()
@@ -133,17 +202,28 @@ def logout() :
 def signup() :
     if request.method == 'POST' :
         username = request.form['username']
-        file = request.files['file']
-        if file and allowed_file( file.filename ) :
-            filename = secure_filename( file.filename )
-            avatar_path = path.join( app.config['UPLOAD_FOLDER'], filename )
-            file.save( avatar_path )
-        add_user( request.form, avatar_path )
+        add_user( request.form )
         flash( 'New user added' )
         session['username'] = username
         return redirect( url_for( 'profile', username=username ) )
     else :
         return render_template( 'signup.html' )
+
+@app.route( '/register', methods = ['GET', 'POST'] )
+def register() :
+    if request.method == 'POST' :
+        username = session['username']
+        if not 'username' in session :
+            return 'You must create an account to register samples!'
+        else :
+            user = get_user( username )
+            result = add_record( user, request.form )
+            if not result :
+                return 'Something went wrong. Sample not registered.'
+            else :
+                return redirect( url_for( 'profile', username=username ) )
+    else :
+        return render_template( 'register.html' )
 
 @app.route( '/user/<username>' )
 def profile( username ) :
