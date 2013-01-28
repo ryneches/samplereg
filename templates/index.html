@@ -1,7 +1,20 @@
 <!doctype html>
-<title>Hello from Flask</title>
+<title>samplereg : a basic sample registration tool</title>
+
+<h1>Welcome to samplereg</h1>
+
+This is samplereg, a simple web application for registering sampling
+kis for citizen science projects.
+
+<p>
+
 {% if username %}
-  <h1>Hello {{ username }}!</h1>
+    <b>Hello {{ username }}!</b><br />
+    <a href="/logout">Log out</a><br />
+    <a href="/user/{{ username }}">Visit your profile</a><br />
+    <a href="/register">Register a sample</a>
 {% else %}
-  <h1>Hello World!</h1>
+    <a href="/signup">Sign up</a><br />
+    <a href="/login">Log in</a><br />
 {% endif %}
+

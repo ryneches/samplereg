@@ -170,9 +170,9 @@ def valid_login( username, password ) :
 @app.route( '/' )
 def index() :
     if 'username' in session :
-        return 'The index page. You\'re logged in as ' + session['username']
+        return render_template( 'index.html', username=session['username'] )
     else :
-        return 'The index page. You\'re not logged in.'
+        return render_template( 'index.html' )
 
 @app.route( '/login', methods = ['GET', 'POST'] )
 def login() :
