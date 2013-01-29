@@ -25,6 +25,7 @@ UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 VALID_IDENTIFIERS = 'ids.txt'
 THUMB_SIZE = 128
+#SERVER_NAME = '/samplereg'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
