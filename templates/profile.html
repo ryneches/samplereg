@@ -1,24 +1,40 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<img class="img-circle" src="{{ url_for('static', filename=user.thumb)}}">
+<style type="text/css">
+    #mid { position:absolute; top:50%; }
+</style>
 
 {% if authenticated %}
     <h1>Welcome to your profile page, {{ user.realname }}!</h1>
-    <a class="btn-large btn-success" href='/register'>Register a new sample</a>
 {% else %}
     <h1>This is the profile page for {{ user.realname }}</h1>
 {% endif %}
 
+<img class="img-circle" src="{{ url_for('static', filename=user.thumb)}}">
+
+{% if authenticated %}
+    <a class="btn-large btn-success" href='/register'>Register a new sample</a>
+{% endif %}
+
+<p/>
+<table class="table table-hover"><body>
+<thead>
+<strong>
+<tr style="font-weight:bold"><td>Context</td><td>Identifier</td><td>Name</td><td>Status</td><td>description</td></tr>
+</strong>
+</thead>
 {% for r in records %}
-    <img src="{{ url_for('static', filename=r.thumb)}}">
-    {{ r.identifier }}, {{ r.name }}
-        {% if r.audited %}
-            (audited) : 
-        {% else %}
-            (unaudited) : 
-        {% endif %}
-    {{ r.description }} <br \>
+    <tr {% if r.audited %}class="success"{% else %}class="warning"{% endif %}>
+    <td>
+    <img class="img-polaroid" src="{{ url_for('static', filename=r.thumb)}}">
+    </td>
+    <td style="padding-top:3.5em;">{{ r.identifier }}</td>
+    <td style="padding-top:3.5em;">{{ r.name }}</td>
+    <td style="padding-top:3.5em;">{% if r.audited %}Audited{% else %}Not audited{% endif %}</td>
+    <td style="padding-top:3.5em;">{{ r.description }}</td>
+    </tr>
 {% endfor %}
+<body></table>
 
 {% endblock %}
