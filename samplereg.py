@@ -3,7 +3,7 @@
 from flask import Flask
 from flask import request, session, redirect, url_for
 from flask import render_template
-from flask import g, flash
+from flask import g, flash, send_from_directory
 from os import path
 from md5 import md5
 from datetime import datetime
@@ -53,6 +53,10 @@ def teardown_request(exception):
     g.db.close()
 
 def make_thumbnail( infile ) :
+    """
+    Take a path to an image file, and make a thumbnail sized verson of
+    it.
+    """
     size = app.config['THUMB_SIZE'],  app.config['THUMB_SIZE']
     file, ext = path.splitext(infile)
     im = Image.open(infile)
@@ -60,6 +64,9 @@ def make_thumbnail( infile ) :
     im.save(file + "_thumb.png", "PNG")
 
 def get_user( username ) :
+    """
+    Get the details on a user.
+    """
     cur = g.db.execute('select username, password, realname, city, state, country, team, avatar from users where username = ? order by id desc', (username,) )
     row = cur.fetchone()
     
@@ -79,13 +86,16 @@ def get_user( username ) :
     return user
 
 def get_user_records( username ) :
+    """
+    Get summary information for records registered by a user.
+    """
     cur = g.db.execute('select identifier, date, name, description, audited from records where user = ? order by id desc', (username,) )
     rows = cur.fetchall()
     records = []
     
     # bag 'em up
     for row in rows :
-        record = dict(  identifer   = row[0],
+        record = dict(  identifier  = row[0],
                         date        = row[1],
                         name        = row[2],
                         description = row[3],
@@ -95,7 +105,9 @@ def get_user_records( username ) :
     return records
 
 def add_user( form ) :
-    
+    """
+    Create a new user in the database.
+    """
     # save the user's avatar file
     file = request.files['avatar']
     if file and allowed_file( file.filename ) :
@@ -117,7 +129,9 @@ def add_user( form ) :
     g.db.commit()
 
 def add_record( user, form ) :
-    
+    """
+    Register a new record.
+    """
     # make sure submitted identifier is in our allowed list
     # return False otherwise
     ids = open( app.config['VALID_IDENTIFIERS'] ).read().strip().split('\n')
@@ -161,6 +175,10 @@ def add_record( user, form ) :
     return True
 
 def valid_login( username, password ) :
+    """
+    Check to see if a user's submitted password matches the stored
+    hash.
+    """
     p = md5( password ).hexdigest()
     user = get_user( username )
     if user and user['password'] == p :
@@ -168,10 +186,20 @@ def valid_login( username, password ) :
     else :
         return False
 
+# uploaded content
+@app.route('/<path:filename>')
+def uploads(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 @app.route( '/' )
 def index() :
+    """
+    The application root.
+    """
     if 'username' in session :
-        return render_template( 'index.html', username=session['username'] )
+        return render_template( 'index.html', 
+                                username=session['username'],
+                                authenticated = True )
     else :
         return render_template( 'index.html' )
 
@@ -201,17 +229,27 @@ def logout() :
 
 @app.route( '/signup', methods = ['GET', 'POST'] )
 def signup() :
+    """
+    Sign up a new user.
+    """
     if request.method == 'POST' :
         username = request.form['username']
         add_user( request.form )
         flash( 'New user added' )
         session['username'] = username
-        return redirect( url_for( 'profile', username=username ) )
     else :
-        return render_template( 'signup.html' )
+        if 'username' in session :
+            return render_template( 'signup.html',
+                                    username = session['username'],
+                                    authenticated = True )
+        else :
+            return render_template( 'signup.html' )
 
 @app.route( '/register', methods = ['GET', 'POST'] )
 def register() :
+    """
+    Register a new sample.
+    """
     if request.method == 'POST' :
         username = session['username']
         if not 'username' in session :
@@ -224,12 +262,22 @@ def register() :
             else :
                 return redirect( url_for( 'profile', username=username ) )
     else :
-        return render_template( 'register.html' )
+        if 'username' in session :
+            return render_template( 'register.html',
+                                    username = session['username'],
+                                    authenticated = True )
+        else :
+            return render_template( 'register.html' )
 
 @app.route( '/user/<username>' )
 def profile( username ) :
-    
+    """
+    The user profile page.
+    """
     user = get_user( username )
+    
+    # add filename for profile thumbnail
+    user['thumbnail'] = user['avatar'].split('.')
     
     if not user :
         return 'User does not exist.'

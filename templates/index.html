@@ -1,17 +1,33 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h1>The Sample Registrar</h1>
+      <div class="hero-unit">
+        <h1>The Sample Registrar</h1>
+		  <p>This is samplereg, a simple web application for registering
+        sampling kits for citizen science projects. If you want to
+        submit samples to the project, you will need one ore more
+        official sampling kits with registration codes.</p>
+        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a>
+			 
 
-<p>This is samplereg, a simple web application for registering sampling
-kits for citizen science projects.</p>
 
 {% if not username %}
-        <a href="{{ url_for('login') }}">Log in</a><br />
-		  <a href="{{ url_for('signup') }}">Sign up</a>
+      <form class="form-signin" action="/login" method="post">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <input type="text" class="input-block-level" placeholder="username" name="username">
+        <input type="password" class="input-block-level" placeholder="Password" name="password">
+        <label class="checkbox">
+          <input type="checkbox" value="remember-me"> Remember me
+        </label>
+        <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+		  <a class="btn btn-large btn-success" href="/signup">Sign up</a>
+      </form>
 {% else %}
-        <a href="{{ url_for('logout') }}">Log out</a><br />
-		  <a href="{{ url_for('register') }}">Register sample
+		  <a class="btn btn-large btn-primary" href="/logout">logout</a>
+		  <a class="btn btn-large btn-primary" href="/register">Register sample</a>
 {% endif %}
+
+      </p>
+      </div>
 
 {% endblock %}
