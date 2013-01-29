@@ -5,11 +5,13 @@
 
 {% if authenticated %}
     <h1>Welcome to your profile page, {{ user.realname }}!</h1>
+    <a class="btn-large btn-success" href='/register'>Register a new sample</a>
 {% else %}
     <h1>This is the profile page for {{ user.realname }}</h1>
 {% endif %}
 
 {% for r in records %}
+    <img src="{{ url_for('static', filename=r.thumb)}}">
     {{ r.identifier }}, {{ r.name }}
         {% if r.audited %}
             (audited) : 
@@ -18,11 +20,5 @@
         {% endif %}
     {{ r.description }} <br \>
 {% endfor %}
-
-<p>
-
-{% if authenticated %}
-    <a class="btn-large btn-success" href='/register'>Register a new sample</a>
-{% endif %}
 
 {% endblock %}

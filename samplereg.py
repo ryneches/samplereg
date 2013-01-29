@@ -21,7 +21,7 @@ TRAP_HTTP_EXCEPTIONS = True
 SECRET_KEY = 'OMG so secret'
 USERNAME = 'admin'
 PASSWORD = 'default'
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 VALID_IDENTIFIERS = 'ids.txt'
 THUMB_SIZE = 128
@@ -32,7 +32,7 @@ app.config.from_object(__name__)
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -136,6 +136,7 @@ def add_record( user, form ) :
     """
     Register a new record.
     """
+    app.logger.debug( request.files['context'].filename )
     # make sure submitted identifier is in our allowed list
     # return False otherwise
     ids = open( app.config['VALID_IDENTIFIERS'] ).read().strip().split('\n')
