@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<img src="{{ url_for('uploads', filename=user.avatar)}}">
+<img class="img-circle" src="{{ url_for('static', filename=user.thumb)}}">
 
 {% if authenticated %}
     <h1>Welcome to your profile page, {{ user.realname }}!</h1>

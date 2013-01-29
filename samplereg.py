@@ -21,7 +21,7 @@ TRAP_HTTP_EXCEPTIONS = True
 SECRET_KEY = 'OMG so secret'
 USERNAME = 'admin'
 PASSWORD = 'default'
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 VALID_IDENTIFIERS = 'ids.txt'
 THUMB_SIZE = 128
@@ -61,13 +61,15 @@ def make_thumbnail( infile ) :
     file, ext = path.splitext(infile)
     im = Image.open(infile)
     im.thumbnail(size, Image.ANTIALIAS)
-    im.save(file + "_thumb.png", "PNG")
+    thumb_filename = file + "_thumb.png"
+    im.save( thumb_filename, "PNG")
+    return thumb_filename
 
 def get_user( username ) :
     """
     Get the details on a user.
     """
-    cur = g.db.execute('select username, password, realname, city, state, country, team, avatar from users where username = ? order by id desc', (username,) )
+    cur = g.db.execute('select username, password, realname, city, state, country, team, avatar, thumb from users where username = ? order by id desc', (username,) )
     row = cur.fetchone()
     
     # the user isn't in the database
@@ -82,14 +84,15 @@ def get_user( username ) :
                     state       = row[4],
                     country     = row[5],
                     team        = row[6],
-                    avatar      = row[7] )
+                    avatar      = row[7],
+                    thumb       = row[8] )
     return user
 
 def get_user_records( username ) :
     """
     Get summary information for records registered by a user.
     """
-    cur = g.db.execute('select identifier, date, name, description, audited from records where user = ? order by id desc', (username,) )
+    cur = g.db.execute('select identifier, date, name, description, context_thumb, audited from records where user = ? order by id desc', (username,) )
     rows = cur.fetchall()
     records = []
     
@@ -99,7 +102,8 @@ def get_user_records( username ) :
                         date        = row[1],
                         name        = row[2],
                         description = row[3],
-                        audited     = row[4] )
+                        thumb       = row[4],
+                        audited     = row[5] )
         records.append(record)
     
     return records
@@ -115,7 +119,7 @@ def add_user( form ) :
         filename = secure_filename( form['username'] + '.' + ext )
         file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
         file.save( file_path )
-        make_thumbnail( file_path )
+        thumb_path = make_thumbnail( file_path )
     else :
         return False
 
@@ -123,9 +127,9 @@ def add_user( form ) :
                 md5( form['password'] ).hexdigest(),
                 form['realname'],
                 form['city'], form['state'], form['country'], 
-                form['team'], file_path )   
+                form['team'], file_path, thumb_path )   
     # SQL is gross
-    g.db.execute('insert into users (username, password, realname, city, state, country, team, avatar) values (?,?,?,?,?,?,?,?)', values )
+    g.db.execute('insert into users (username, password, realname, city, state, country, team, avatar, thumb) values (?,?,?,?,?,?,?,?,?)', values )
     g.db.commit()
 
 def add_record( user, form ) :
@@ -140,6 +144,7 @@ def add_record( user, form ) :
 
     # save the photos
     photos = { 'context' : '', 'closeup' : '' }
+    thumbs = { 'context' : '', 'closeup' : '' }
     for photo in photos.keys() :
         file = request.files[photo]
         if file and allowed_file( file.filename ) :
@@ -147,7 +152,7 @@ def add_record( user, form ) :
             filename = secure_filename( form['identifier'] + '_' + photo + '.' + ext )
             file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
             file.save( file_path )
-            make_thumbnail( file_path )
+            thumb[photo] = make_thumbnail( file_path )
             photos[photo] = file_path
         else :
             return False
@@ -166,7 +171,9 @@ def add_record( user, form ) :
                 bool(form['direct_sunlight']),
                 float(form['temp']),
                 photos['closeup'],
+                thumb['closeup'],
                 photos['context'],
+                thumb['context'],
                 form['name'],
                 form['description'],
                 False )
@@ -187,9 +194,9 @@ def valid_login( username, password ) :
         return False
 
 # uploaded content
-@app.route('/<path:filename>')
-def uploads(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+#@app.route('/<path:filename>')
+#def uploads(filename):
+#    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route( '/' )
 def index() :

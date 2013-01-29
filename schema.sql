@@ -8,7 +8,8 @@ create table users (
     state       string not null,
     country     string not null,
     team        string not null,
-    avatar      string not null
+    avatar      string not null,
+    thumb       string not null
 );
 
 drop table if exists records;
@@ -27,7 +28,9 @@ create table records (
     direct_sunlight     boolean,
     temp                real,
     closeup             string not null,
+    closeup_thumb       string not null,
     context             string not null,
+    context_thumb       string not null,
     name                string not null,
     description         string not null,
     audited             boolean
