@@ -1,19 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h1>Create a new user</h1>
+<form class="form-signin" action="/signup" method="post" enctype="multipart/form-data">
+<h1>Sign up!</h1>
+<input type="text" class="input-block-level" placeholder="Username" name="username" size="15"></input><br />
+<input class="input-block-level" placeholder="Password" type="password" name="password" size="15"></input><br />
+<input class="input-block-level" placeholder="Password (again)" type="password" name="password_check" size="15"></input><br />
+<input type="text" class="input-block-level" placeholder="Real name" name="realname" size="15"></input><br />
+<input type="text" class="input-block-level" placeholder="City" name="city" size="15"></input><br />
+<input type="text" class="input-block-level" placeholder="State" name="state" size="15"></input><br />
+<input type="text" class="input-block-level" placeholder="Country" name="country" size="15"></input><br />
+<input type="text" class="input-block-level" placeholder="Team name" name="team" size="15"></input><br />
+<span class="btn btn-file"> Your avatar photo <input type="file" name="avatar" /></span><br /><br />
 
-<form action="/signup" method="post" enctype="multipart/form-data">
-username : <input type="text" name="username" size="15"></input><br />
-password :<input type="password" name="password" size="15"></input><br />
-password (again) : <input type="password" name="password_check" size="15"></input><br />
-real name : <input type="text" name="realname" size="15"></input><br />
-city : <input type="text" name="city" size="15"></input><br />
-state : <input type="text" name="state" size="15"></input><br />
-country : <input type="text" name="country" size="15"></input><br />
-team name : <input type="text" name="team" size="15"></input><br />
-your avatar : <input type="file" name="avatar">
-<input type="submit" value="Signup"></input>
+<input class="btn-large btn-success" type="submit" value="Signup"></input>
 </form> 
 
 {% endblock %}

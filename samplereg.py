@@ -237,6 +237,7 @@ def signup() :
         add_user( request.form )
         flash( 'New user added' )
         session['username'] = username
+        return redirect( url_for( 'profile', username=username ) )
     else :
         if 'username' in session :
             return render_template( 'signup.html',
@@ -275,9 +276,6 @@ def profile( username ) :
     The user profile page.
     """
     user = get_user( username )
-    
-    # add filename for profile thumbnail
-    user['thumbnail'] = user['avatar'].split('.')
     
     if not user :
         return 'User does not exist.'
