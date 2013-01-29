@@ -152,7 +152,7 @@ def add_record( user, form ) :
             filename = secure_filename( form['identifier'] + '_' + photo + '.' + ext )
             file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
             file.save( file_path )
-            thumb[photo] = make_thumbnail( file_path )
+            thumbs[photo] = make_thumbnail( file_path )
             photos[photo] = file_path
         else :
             return False
@@ -171,13 +171,13 @@ def add_record( user, form ) :
                 bool(form['direct_sunlight']),
                 float(form['temp']),
                 photos['closeup'],
-                thumb['closeup'],
+                thumbs['closeup'],
                 photos['context'],
-                thumb['context'],
+                thumbs['context'],
                 form['name'],
                 form['description'],
                 False )
-    g.db.execute('insert into records (identifier, user, date, lat, lng, surface_material, surface_condition, surface_humidity, context_type, inorout, direct_sunlight, temp, closeup, context, name, description, audited) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', values )
+    g.db.execute('insert into records (identifier, user, date, lat, lng, surface_material, surface_condition, surface_humidity, context_type, inorout, direct_sunlight, temp, closeup, closeup_thumb, context, context_thumb, name, description, audited) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', values )
     g.db.commit()
     return True
 
@@ -297,6 +297,10 @@ def profile( username ) :
             return render_template( 'profile.html',
                                     user = user,
                                     records = records ) 
+
+@app.route( '/favicon.ico' )
+def favicon() :
+    return redirect( url_for( 'static', filename='favicon.ico' ) )
 
 if __name__ == '__main__' :
     app.debug = True
