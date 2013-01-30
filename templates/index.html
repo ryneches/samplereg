@@ -12,15 +12,15 @@
 
 
 {% if not username %}
-      <form class="form-signin" action="/login" method="post">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <input type="text" class="input-block-level" placeholder="username" name="username">
-        <input type="password" class="input-block-level" placeholder="Password" name="password">
-        <label class="checkbox">
-          <input type="checkbox" value="remember-me"> Remember me
-        </label>
+      <form class="well form-search" action="/login" method="post">
+        <h2>Please sign in</h2>
+        <input type="text" placeholder="username" name="username">
+        <input type="password" placeholder="Password" name="password">
         <button class="btn btn-large btn-primary" type="submit">Sign in</button>
-		  <a class="btn btn-large btn-success" href="/signup">Sign up</a>
+		<a class="btn btn-large btn-success" href="/signup">Sign up</a><br/>
+        <label class="checkbox">
+        <input type="checkbox" value="remember-me"> Remember me
+        </label>
       </form>
 {% else %}
 		  <a class="btn btn-large btn-primary" href="/logout">logout</a>
