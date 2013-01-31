@@ -23,12 +23,22 @@ USERNAME = 'admin'
 PASSWORD = 'default'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+DEFAULT_AVATAR = 'shanana.png'
 VALID_IDENTIFIERS = 'ids.txt'
 THUMB_SIZE = 128
 #SERVER_NAME = '/samplereg'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+class RegistrationException(Exception) :
+    pass
+
+class UserException(Exception) :
+    pass
+
+class ImageException(Exception) :
+    pass
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -112,8 +122,12 @@ def add_user( form ) :
     """
     Create a new user in the database.
     """
-    # save the user's avatar file
-    file = request.files['avatar']
+    # try to save the user's avatar file, or use the default one
+    if 'avatar' in request.files :
+        file = request.files['avatar']
+    else :
+        file = 
+
     if file and allowed_file( file.filename ) :
         ext = file.filename.split('.')[-1]
         filename = secure_filename( form['username'] + '.' + ext )
@@ -141,7 +155,7 @@ def add_record( user, form ) :
     # return False otherwise
     ids = open( app.config['VALID_IDENTIFIERS'] ).read().strip().split('\n')
     if not ids.__contains__(form['identifier']) :
-        return False
+        raise RegistrationException( 'Unknown sample identifier.' )
 
     # save the photos
     photos = { 'context' : '', 'closeup' : '' }
@@ -156,7 +170,7 @@ def add_record( user, form ) :
             thumbs[photo] = make_thumbnail( file_path )
             photos[photo] = file_path
         else :
-            return False
+            raise RegistrationException( 'Something is wrong with the ' + photo + ' photo.' )
    
     # all new records are created with audited=False
     values = (  form['identifier'],
@@ -223,7 +237,8 @@ def login() :
             session['username'] = username
             return redirect(url_for('profile', username=username ))
         else :
-            return 'who are you again?'
+            flash( 'Who are you again?' )
+            return redirect( url_for( 'login' ) )
     else : 
         return render_template( 'login.html' )
 
@@ -259,17 +274,18 @@ def register() :
     """
     Register a new sample.
     """
+    if not 'username' in session :
+        flash( 'You must create an account to register samples!' )
+        return redirect( url_for( 'index' ) )
+    
+    username = session['username']
     if request.method == 'POST' :
-        username = session['username']
-        if not 'username' in session :
-            return 'You must create an account to register samples!'
+        user = get_user( username )
+        result = add_record( user, request.form )
+        if not result :
+            return 'Something went wrong. Sample not registered.'
         else :
-            user = get_user( username )
-            result = add_record( user, request.form )
-            if not result :
-                return 'Something went wrong. Sample not registered.'
-            else :
-                return redirect( url_for( 'profile', username=username ) )
+            return redirect( url_for( 'profile', username=username ) )
     else :
         if 'username' in session :
             return render_template( 'register.html',

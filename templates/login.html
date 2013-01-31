@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p>This is samplereg, a simple web application for registering sampling
-kits for citizen science projects.</p>
-
-<form action="/login" method="post">
-<input type="text" name="username" size="15"></input><br />
-<input type="password" name="password" size="15"></input><br />
-<input type="submit" value="login"></input>
+<form class="well form-search" action="/login" method="post">
+    <h2>Please sign in</h2>
+    <input type="text" placeholder="username" name="username">
+    <input type="password" placeholder="Password" name="password">
+    <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+    <a class="btn btn-large btn-success" href="/signup">Sign up</a><br/>
+    <label class="checkbox">
+    <input type="checkbox" value="remember-me"> Remember me
+    </label>
 </form>
 
 {% endblock %}

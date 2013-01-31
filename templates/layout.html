@@ -77,10 +77,18 @@
 
     <div class="container">
 
-        {% for message in get_flashed_messages() %}
-        <div class=flash>{{ message }}</div>
-        {% endfor %}
-        {% block body %}{% endblock %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert fade in">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <h3>Whoops!</h3><strong><p>{{ message }}</p></strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+       
+    {% block body %}{% endblock %}
 
     </div> <!-- /container -->
 
