@@ -115,33 +115,39 @@ def get_user_records( username ) :
                         thumb       = row[4],
                         audited     = row[5] )
         records.append(record)
-    
+        
     return records
 
 def add_user( form ) :
     """
     Create a new user in the database.
     """
+    # check to see if the user already exists
+    if get_user( form['username'] ) :
+        raise UserException( 'This user already exists!' )
+    
     # try to save the user's avatar file, or use the default one
     if 'avatar' in request.files :
         file = request.files['avatar']
-    else :
-        file = 
-
-    if file and allowed_file( file.filename ) :
+        
+        # check that it's an allowed file type
+        if not allowed_file( file.filename ) :
+            raise UserException( 'This image file type is not supported.' )
         ext = file.filename.split('.')[-1]
         filename = secure_filename( form['username'] + '.' + ext )
         file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
         file.save( file_path )
-        thumb_path = make_thumbnail( file_path )
     else :
-        return False
-
+        file_name = path.join( app.config['UPLOAD_FOLDER'], app.config['DEFAULT_AVATAR'] )
+    
+    thumb_path = make_thumbnail( file_path )
+    
     values = (  form['username'], 
                 md5( form['password'] ).hexdigest(),
                 form['realname'],
                 form['city'], form['state'], form['country'], 
                 form['team'], file_path, thumb_path )   
+    
     # SQL is gross
     g.db.execute('insert into users (username, password, realname, city, state, country, team, avatar, thumb) values (?,?,?,?,?,?,?,?,?)', values )
     g.db.commit()
@@ -208,11 +214,6 @@ def valid_login( username, password ) :
     else :
         return False
 
-# uploaded content
-#@app.route('/<path:filename>')
-#def uploads(filename):
-#    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
 @app.route( '/' )
 def index() :
     """
@@ -257,7 +258,11 @@ def signup() :
     """
     if request.method == 'POST' :
         username = request.form['username']
-        add_user( request.form )
+        try :
+            add_user( request.form )
+        except UserException as e :
+            flash( e.message )
+            return redirect( url_for( 'signup' ) )
         flash( 'New user added' )
         session['username'] = username
         return redirect( url_for( 'profile', username=username ) )
