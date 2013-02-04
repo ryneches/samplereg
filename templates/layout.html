@@ -64,8 +64,8 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><a data-toggle="modal" href="#aboutModal">About</a></li>
+              <li><a data-toggle="modal" href="#contactModal">Contact</a></li>
               {% if authenticated %} 
                   
 				  <li><a href="{{ url_for('profile', username=username) }}">My profile</a></li>
@@ -79,7 +79,45 @@
     </div>
 
     <div class="container">
-    
+
+    <div id="aboutModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="myModalLabel">About the Sample Registrar</h3>
+    </div>
+    <div class="modal-body">
+    <p>The Sample Registrar was created by <a href="http://vort.org/">Russell Neches</a> as part of 
+    the Project MERCCURI collaboration among <a href="http://ucdavis.edu">UC Davis</a>, 
+    <a href="http://www.sciencecheerleader.com/">Science Cheerleader</a>,
+    <a href="http://scistarter.com/">Scistarter</a>, <a href="http://www.spaceflorida.gov/">Sace Florida</a>
+    and <a href="http://nanoracks.com/">NanoRacks</a>.</p>
+    <p>The Sample Registrar is designed to be a central clearinghouse for coordinating 
+    <a href="http://en.wikipedia.org/wiki/Citizen_science">citizen science</a> sample
+    collection and return.
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+    </div>
+
+    <div id="contactModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="myModalLabel">Contact us</h3>
+    </div>
+    <div class="modal-body">
+    Write to us at :
+    <p>Sample Registrar, c/o Russell Neches<br/>
+    Genome and Biomedical Sciences Facilities<br/>
+    451 Health Sciences Drive<br/>
+    Davis, CA  95616-8816<br/>
+    </p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+    </div>
+   
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
