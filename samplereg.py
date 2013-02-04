@@ -122,12 +122,24 @@ def add_user( form ) :
     """
     Create a new user in the database.
     """
+    # check that the user actually filled out the form
+    if not form['username'] or          \
+       not form['realname'] or          \
+       not form['password'] or          \
+       not form['password_check'] or    \
+       not form['team'] :
+        raise UserException( 'Looks like you\'re not done filling out the form!' )
+    
+    # check that the passwords match
+    if not form['password'] == form['password_check'] :
+        raise UserException( 'Those passwords don\'t match!' )
+    
     # check to see if the user already exists
     if get_user( form['username'] ) :
         raise UserException( 'This user already exists!' )
     
     # try to save the user's avatar file, or use the default one
-    if 'avatar' in request.files :
+    if request.files['avatar'] :
         file = request.files['avatar']
         
         # check that it's an allowed file type
@@ -138,7 +150,7 @@ def add_user( form ) :
         file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
         file.save( file_path )
     else :
-        file_name = path.join( app.config['UPLOAD_FOLDER'], app.config['DEFAULT_AVATAR'] )
+        file_path = path.join( app.config['UPLOAD_FOLDER'], app.config['DEFAULT_AVATAR'] )
     
     thumb_path = make_thumbnail( file_path )
     
@@ -238,7 +250,7 @@ def login() :
             session['username'] = username
             return redirect(url_for('profile', username=username ))
         else :
-            flash( 'Who are you again?' )
+            flash( 'Who are you again?', 'alert-error' )
             return redirect( url_for( 'login' ) )
     else : 
         return render_template( 'login.html' )
@@ -261,9 +273,9 @@ def signup() :
         try :
             add_user( request.form )
         except UserException as e :
-            flash( e.message )
+            flash( e.message, 'alert-error' )
             return redirect( url_for( 'signup' ) )
-        flash( 'New user added' )
+        flash( 'New user added', 'alert-success' )
         session['username'] = username
         return redirect( url_for( 'profile', username=username ) )
     else :
@@ -280,7 +292,7 @@ def register() :
     Register a new sample.
     """
     if not 'username' in session :
-        flash( 'You must create an account to register samples!' )
+        flash( 'You must create an account to register samples!', 'alert-error' )
         return redirect( url_for( 'index' ) )
     
     username = session['username']
@@ -288,8 +300,10 @@ def register() :
         user = get_user( username )
         result = add_record( user, request.form )
         if not result :
-            return 'Something went wrong. Sample not registered.'
+            flash( 'Something has gone wrong. Sample not registered.', 'alert-error' )
+            return redirect( url_for( 'register') )
         else :
+            flash( 'Sample ' + request.form['identifier'] + ' registered!', 'alert-success' )
             return redirect( url_for( 'profile', username=username ) )
     else :
         if 'username' in session :

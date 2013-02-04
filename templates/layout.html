@@ -66,8 +66,11 @@
               <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
               <li><a href="#about">About</a></li>
               <li><a href="#contact">Contact</a></li>
-				  {% if authenticated %} 
+              {% if authenticated %} 
+                  
 				  <li><a href="{{ url_for('profile', username=username) }}">My profile</a></li>
+				  <li><a href="{{ url_for('logout', username=username)
+}}">Log out</a></li>
               {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
@@ -76,13 +79,18 @@
     </div>
 
     <div class="container">
-
-    {% with messages = get_flashed_messages() %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert fade in">
+            {% for category, message in messages %}
+                <div class="{{ category }} alert fade in">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <h3>Whoops!</h3><strong><p>{{ message }}</p></strong>
+                    {% if category == "alert-error" %}
+                    <h3>Whoops!</h3>
+                    {% else %}
+                    <h3>So!</h3>
+                    {% endif %}
+                    <strong><p>{{ message }}</p></strong>
                 </div>
             {% endfor %}
         {% endif %}
