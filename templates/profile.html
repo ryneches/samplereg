@@ -11,7 +11,26 @@
     <h1>This is the profile page for {{ user.realname }}</h1>
 {% endif %}
 
+<!-- avatar with avatar change modal -->
+<form action='/newavatar' method='post' enctype="multipart/form-data">
+<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="myModalLabel">Upload a new avatar picture!</h3>
+    </div>
+    <div class="modal-body">
+       <input type="file" name="avatar" />
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <input type="submit" class="btn btn-primary" value="Save changes"></input>
+    </div>
+</div>
+</form>
+
+<a data-toggle="modal" href="#myModal">
 <img class="img-circle" src="{{ url_for('static', filename=user.thumb)}}">
+</a>
 
 {% if authenticated %}
     <a class="btn-large btn-success" href='/register'>Register a new sample</a>

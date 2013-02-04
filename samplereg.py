@@ -145,7 +145,7 @@ def add_user( form ) :
         # check that it's an allowed file type
         if not allowed_file( file.filename ) :
             raise UserException( 'This image file type is not supported.' )
-        ext = file.filename.split('.')[-1]
+        ext = file.filename.lower().split('.')[-1]
         filename = secure_filename( form['username'] + '.' + ext )
         file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
         file.save( file_path )
@@ -162,6 +162,20 @@ def add_user( form ) :
     
     # SQL is gross
     g.db.execute('insert into users (username, password, realname, city, state, country, team, avatar, thumb) values (?,?,?,?,?,?,?,?,?)', values )
+    g.db.commit()
+
+def update_avatar( username, file ) :
+    
+    # check that it's an allowed file type
+    if not allowed_file( file.filename ) :
+        raise UserException( 'This image file type is not suppported.' )
+    ext = file.filename.lower().split('.')[-1]
+    filename = secure_filename( username + '.' + ext )
+    file_path = path.join( app.config['UPLOAD_FOLDER'], filename )
+    file.save( file_path )
+    thumb_path = make_thumbnail( file_path )
+    values = ( file_path, thumb_path, username )
+    g.db.execute('update users set avatar=? and thumb=? where username=?', values )
     g.db.commit()
 
 def add_record( user, form ) :
@@ -312,6 +326,25 @@ def register() :
                                     authenticated = True )
         else :
             return render_template( 'register.html' )
+
+@app.route( '/newavatar', methods = ['POST'] )
+def newavatar() :
+    """
+    Update a user's avatar.
+    """
+    # You have to be logged in to update avatars
+    if not 'username' in session :
+        flash( 'You must be logged in to update your avatar.', 'alert-error' )
+        return redirect( url_for( 'index' ) )
+    
+    username = session['username']
+    if not 'avatar' in request.files :
+        flash( 'Wern\'t you uploading a file or something', 'alert-error' )
+        return redirect( url_for( 'profile', username=username ) )
+    file = request.files['avatar']
+    update_avatar( username, file )
+    #flash( 'Your avatar has been updated!', 'alert-success' )
+    return redirect( url_for( 'profile', username=username ) )    
 
 @app.route( '/user/<username>' )
 def profile( username ) :
